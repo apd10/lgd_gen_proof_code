@@ -1,0 +1,60 @@
+module: "Loop"
+device_id: 1
+epochs: 11
+train_data:
+  file: "DATA/susy/train.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+test_data:
+  file: "DATA/susy/test.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "simple"
+  simple:
+    batch_size: 1000
+progress_test_data:
+  file: "DATA/susy/valid.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+
+  sampler: "simple"
+  simple:
+    batch_size: 1000
+model:
+  name: "MLPSG"
+  MLPSG:
+    input_dim: 8
+    num_layers: 4
+    hidden_size: 500
+    num_class: 2
+optimizer:
+  name: "adam"
+  adam:
+    lr: 0.001
+    weight_decay: 0
+loss:
+  name: "BCE"
+progress_evaluator:
+  name: "simple_print"
+  simple_print:
+      eval_itr: 500000000
+      eval_epoch: 1
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4.csv"
+      skip_0: 1
+metrics: "acc,auc"
+binary: True

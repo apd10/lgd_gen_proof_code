@@ -1,0 +1,11 @@
+module: "Stats"
+device_id: 0
+data:
+  file: "/home/apd10/experiments/projects/summary_based_learning/DATA/mnist/train.txt"
+  dataset: "gensvm"
+  gensvm:
+    dimension: 784
+  sampler: "simple"
+  simple:
+    batch_size: 100000
+stat_file: "/home/apd10/experiments/projects/summary_based_learning/DATA/mnist/centering_info.npz"

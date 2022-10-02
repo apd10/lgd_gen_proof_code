@@ -1,0 +1,14 @@
+module: "Stats"
+device_id: 0
+data:
+  file: "DATA/susy/train.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "simple"
+  simple:
+    batch_size: 100000
+stat_file: "DATA/sus/centering_info.npz"

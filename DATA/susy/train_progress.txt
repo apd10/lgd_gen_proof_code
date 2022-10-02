@@ -1,0 +1,1 @@
+/home/apd10/experiments/projects/summary_based_learning/DATA/susy/train_progress.txt

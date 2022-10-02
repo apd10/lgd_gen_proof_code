@@ -1,0 +1,72 @@
+module: "Loop"
+device_id: 0
+epochs: 25
+#model_internal_logging_itr: 100
+#model_log_file: "DATA/higgs/record/model_log.L500.N4.csv"
+train_data:
+  file: "DATA/higgs/train.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/higgs/centering_info.npz"
+    use_only: 21
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+progress_train_data:
+  file: "DATA/higgs/train_progress.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/higgs/centering_info.npz"
+    use_only: 21
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+test_data:
+  file: "DATA/higgs/test.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/higgs/centering_info.npz"
+    use_only: 21
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+progress_test_data:
+  file: "DATA/higgs/valid.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/higgs/centering_info.npz"
+    use_only: 21
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+model:
+  name: "MLPSG"
+  MLPSG:
+    input_dim: 21
+    num_layers: 4
+    hidden_size: 500
+    num_class: 2
+optimizer:
+  name: "adam"
+  adam:
+    lr: 0.001
+    weight_decay: 0
+loss:
+  name: "BCE"
+progress_evaluator:
+  name: "simple_print"
+  simple_print:
+      eval_itr: 500000000
+      eval_epoch: 1
+      csv_dump: "DATA/higgs/record/log.train.sg21.L500.N4.csv"
+      skip_0: 1
+metrics: "acc,auc"
+binary: True

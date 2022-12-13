@@ -23,10 +23,15 @@ class Data:
         self.total_num_points = self.sampler.total_size
         self.unfiltered_num_points = 0
 
-    def next(self):
+    def next(self): # Simple sampler 
+        num, X = self.sampler.next()
+        self.num_points += num  
+        return X
+    
+    def next_filter(self): # Race sampler
         num, unfilt_idx, X = self.sampler.next()
-        self.num_points += num # number of filtered data points 
-        self.unfiltered_num_points = unfilt_idx+1 # +1 because index starts from zero  
+        self.num_points += num # number of filtered data points
+        self.unfiltered_num_points = unfilt_idx+1 # +1 because index starts from zero
         return X
         
     def end(self): # Simple sampler

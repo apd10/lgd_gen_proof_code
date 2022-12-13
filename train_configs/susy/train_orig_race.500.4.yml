@@ -1,6 +1,6 @@
 module: "LoopRace"
 device_id: 7
-epochs: 11
+epochs: 5
 train_data:
   file: "DATA/susy/train.txt"
   dataset: "csv"
@@ -12,7 +12,7 @@ train_data:
   sampler: "race"
   race:
     batch_size: 1024
-    sampling_rate: 0.7
+    sampling_rate: 1.
 test_data:
   file: "DATA/susy/test.txt"
   dataset: "csv"
@@ -21,10 +21,9 @@ test_data:
     label_header: 0
     centering_info: "DATA/susy/centering_info.npz"
     use_only: 8
-  sampler: "race"
-  race:
-    batch_size: 1000
-    sampling_rate: 1.
+  sampler: "simple"
+  simple:
+    batch_size: 1024
 progress_test_data:
   file: "DATA/susy/valid.txt"
   dataset: "csv"
@@ -33,10 +32,20 @@ progress_test_data:
     label_header: 0
     centering_info: "DATA/susy/centering_info.npz"
     use_only: 8
-  sampler: "race"
-  race:
-    batch_size: 1000
-    sampling_rate: 1.
+  sampler: "simple"
+  simple:
+    batch_size: 1024
+progress_train_data:
+  file: "DATA/susy/train.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "simple"
+  simple:
+    batch_size: 1024
 np_seed: 101
 race:
   power: 3
@@ -83,7 +92,7 @@ progress_evaluator:
           # eval_itr: 500000000
       eval_itr: 1000
       eval_epoch: 1
-      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_racetest_12122022.csv"
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race.csv"
       skip_0: 1
 metrics: "acc,auc"
 binary: True

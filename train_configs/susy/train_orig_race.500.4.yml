@@ -1,0 +1,89 @@
+module: "LoopRace"
+device_id: 7
+epochs: 11
+train_data:
+  file: "DATA/susy/train.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "race"
+  race:
+    batch_size: 1024
+    sampling_rate: 0.7
+test_data:
+  file: "DATA/susy/test.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "race"
+  race:
+    batch_size: 1000
+    sampling_rate: 1.
+progress_test_data:
+  file: "DATA/susy/valid.txt"
+  dataset: "csv"
+  csv:
+    sep: ","
+    label_header: 0
+    centering_info: "DATA/susy/centering_info.npz"
+    use_only: 8
+  sampler: "race"
+  race:
+    batch_size: 1000
+    sampling_rate: 1.
+np_seed: 101
+race:
+  power: 3
+  repetitions: 1
+  num_classes: 2
+  max_coord: 0 # not used when power = D
+  min_coord: 0 # not used when power = D
+  random_seed: 101
+  ace_type: "cs"
+  ace_params:
+    rep : 6
+    range : 50000
+    num_keys : 3 # equal to the power
+    device_id : -1 # to do on cpu. test device as well later
+    sketch_type : "CS" # we only store counts
+    recovery : "mean" # mean recovery
+    #topK : None # top 1000 buckets should be good
+    #privacy_epsilon: 0 # this value should be epsilon/repetitions_race
+  lsh_function:
+    name: "l2lsh_torch"
+    l2lsh_torch:
+      bandwidth: 0.01
+      dimension: 8
+      max_norm: 10000 # not used curently
+      device_id: -1
+
+model:
+  name: "MLPSG"
+  MLPSG:
+    input_dim: 8
+    num_layers: 4
+    hidden_size: 500
+    num_class: 2
+optimizer:
+  name: "adam"
+  adam:
+    lr: 0.001
+    weight_decay: 0
+loss:
+  name: "BCE"
+progress_evaluator:
+  name: "simple_print"
+  simple_print:
+          # eval_itr: 500000000
+      eval_itr: 1000
+      eval_epoch: 1
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_racetest_12122022.csv"
+      skip_0: 1
+metrics: "acc,auc"
+binary: True

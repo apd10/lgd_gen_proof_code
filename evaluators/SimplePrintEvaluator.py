@@ -36,8 +36,10 @@ class SimplePrintEvaluator:
         y_true = np.array([])
         y_pred = np.array([])
         y_score = np.array([])
+        split_key = key
         
         with torch.no_grad():
+            #pdb.set_trace()
             data.reset()
             while not data.end():
                 x, y = data.next()
@@ -106,14 +108,14 @@ class SimplePrintEvaluator:
                       aux_print_str += "{}: {}".format(metric, "[undefined-see-SimplePrintEvaluator]")
                 
         if split_label:
-            print('{} : Epoch : {} Loc_itr: {} Iteration: {} Loss: {:.4f} Accuracy: {:.4f} LabelAcc: {}'.format(key, epoch, loc_itr, iteration, valid_loss, acc, accs) + aux_print_str)
+            print('{} : Epoch : {} Loc_itr: {} Iteration: {} Loss: {:.4f} Accuracy: {:.4f} LabelAcc: {}'.format(split_key, epoch, loc_itr, iteration, valid_loss, acc, accs) + aux_print_str)
         else:    
-            print('{} : Epoch : {} Loc_itr: {} Iteration: {} Loss: {:.4f} Accuracy: {:.4f}'.format(key, epoch, loc_itr, iteration, valid_loss, acc) + aux_print_str)
+            print('{} : Epoch : {} Loc_itr: {} Iteration: {} Loss: {:.4f} Accuracy: {:.4f}'.format(split_key, epoch, loc_itr, iteration, valid_loss, acc) + aux_print_str)
         if self.csv_dump is not None:
             f = open(self.csv_dump, "a")
             if  not self.header_written:
                 self.header_written = True
                 f.write('{},{},{},{},{},{}{}\n'.format("key", "epoch", "loc_itr", "iteration", "loss", "acc",aux_header))
-            f.write('{},{},{},{},{},{}{}\n'.format(key, epoch, loc_itr, iteration, valid_loss, acc,aux_data))
+            f.write('{},{},{},{},{},{}{}\n'.format(split_key, epoch, loc_itr, iteration, valid_loss, acc,aux_data))
             f.close()
             

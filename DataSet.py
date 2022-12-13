@@ -28,6 +28,8 @@ class DataSet:
           dataset = RunningRaceParser(data_file, params)
         elif name == "gaussian_kde":
           dataset = GaussianKDE(data_file, params)
+     #   elif name == "csvitr":
+     #     dataset = CSVParserItr(data_file, params)
         else:
           raise NotImplementedError
         return dataset

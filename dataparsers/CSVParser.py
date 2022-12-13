@@ -8,6 +8,7 @@ from dataparsers.BasicParser import *
 class CSVParser(BasicParser):
     def __init__(self, X_file, params):
         super(CSVParser, self).__init__()
+        self.X_file = X_file
         self.sep = params["sep"]
         self.header = None
         if "header" in params:
@@ -15,7 +16,7 @@ class CSVParser(BasicParser):
         self.skiprows = None
         if "skiprows" in params:
             self.skiprows = params["skiprows"]
-        self.X = pd.read_csv(X_file, sep=self.sep, header=self.header, skiprows=self.skiprows)
+        self.X = pd.read_csv(self.X_file, sep=self.sep, header=self.header, skiprows=self.skiprows)
         print("initial lines", len(self.X))
         self.X = self.X.dropna()
         print("Drop na lines", len(self.X))
@@ -51,16 +52,32 @@ class CSVParser(BasicParser):
 
         self.length = self.X.shape[0]
         self.dimension = self.X.shape[1]
+       # self.train_flg = False
+#        pdb.set_trace()
+       # if 'train' in X_file:
+       #     self.train_flg = True
+        
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, index):
-        label = self.labels[index]
-        data_point = np.array(self.X.loc[index].values)
+       # pdb.set_trace()
+       # label = self.labels[index]
+       # data_point = np.array(self.X.loc[index].values)
+        label = self.labels.values[index]
+        data_point = np.array(self.X.values[index])
+        #pdb.set_trace()
+        #if self.center:
+        #    data_point = (data_point - self.mu) / (self.std + 1e-5)
+        if self.use_only is not None:
+           # pdb.set_trace()
+            #if self.train_flg: # batchwise parsing
+            data_point  = data_point[:,:self.use_only]
+           # else:
+           #     data_point  = data_point[:self.use_only]
         if self.center:
             data_point = (data_point - self.mu) / (self.std + 1e-5)
-        if self.use_only is not None:
-            data_point  = data_point[:self.use_only]
+       # if label > 0:
         return data_point, label
 

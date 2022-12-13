@@ -15,7 +15,7 @@ class BaseModel(nn.Module):
     def logger(self, itr, enabled):
         if not enabled :
             return
-        pdb.set_trace()
+        #pdb.set_trace()
         if self.initial_values is None:
             self.initial_values = {}
             self.logdata = {}

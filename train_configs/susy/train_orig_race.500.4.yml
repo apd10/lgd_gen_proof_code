@@ -1,6 +1,6 @@
 module: "LoopRace"
 device_id: 7
-epochs: 5
+epochs: 2
 train_data:
   file: "DATA/susy/train.txt"
   dataset: "csv"
@@ -12,7 +12,8 @@ train_data:
   sampler: "race"
   race:
     batch_size: 1024
-    sampling_rate: 1.
+    sampling_rate: 0.8
+    race_update_freq: 1000000000 # per x iterations 
 test_data:
   file: "DATA/susy/test.txt"
   dataset: "csv"
@@ -48,28 +49,17 @@ progress_train_data:
     batch_size: 1024
 np_seed: 101
 race:
-  power: 3
-  repetitions: 1
   num_classes: 2
-  max_coord: 0 # not used when power = D
-  min_coord: 0 # not used when power = D
-  random_seed: 101
-  ace_type: "cs"
-  ace_params:
-    rep : 6
-    range : 50000
-    num_keys : 3 # equal to the power
-    device_id : -1 # to do on cpu. test device as well later
-    sketch_type : "CS" # we only store counts
-    recovery : "mean" # mean recovery
-    #topK : None # top 1000 buckets should be good
-    #privacy_epsilon: 0 # this value should be epsilon/repetitions_race
+  num_bucket: 10000  
+  device_id : -1 # to do on cpu. test device as well later
+  recovery : "mean" # mean recovery
   lsh_function:
-    name: "l2lsh_torch"
-    l2lsh_torch:
-      bandwidth: 0.01
+    name: "srp_torch"
+    srp_torch:
       dimension: 8
-      max_norm: 10000 # not used curently
+      num_bits: 16
+      num_hash : 100
+      seed: 101
       device_id: -1
 
 model:
@@ -92,7 +82,7 @@ progress_evaluator:
           # eval_itr: 500000000
       eval_itr: 1000
       eval_epoch: 1
-      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race.csv"
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race_test.csv"
       skip_0: 1
 metrics: "acc,auc"
 binary: True

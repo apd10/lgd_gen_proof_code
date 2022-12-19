@@ -10,7 +10,7 @@ import pdb
 import numpy as np
 from tqdm import tqdm
 import pandas as pd
-from special_modules.race.RaceGen import *
+from race.race_classwise_torch import Race_Classwise_torch
 
 class Loop_withRace:
     def __init__(self, params):
@@ -31,9 +31,11 @@ class Loop_withRace:
         # model
         self.model = Model.get(params["model"])
         print(self.model)
-        self.race = RaceGen(params["race"])
+        #self.race_weighted = RaceGen(params["race"])
+        #self.race_unweighted = RaceGen(params["race"])
         #pdb.set_trace()
-        self.train_data = Data(params["train_data"],model=self.model,race=self.race, device_id=self.device_id, loss=params["loss"])
+        self.race = Race_Classwise_torch(params["race"])
+        self.train_data = Data(params["train_data"],model=self.model, race=self.race, device_id=self.device_id, loss=params["loss"])
 
         if self.device_id != -1:
           self.model = self.model.cuda(self.device_id)
@@ -108,7 +110,7 @@ class Loop_withRace:
                   break
                 self.model.train()
                 self.optimizer.zero_grad()
-                x_cpu, y_cpu = self.train_data.next()
+                x_cpu, y_cpu = self.train_data.next_filter()
                 x = Variable(x_cpu).cuda(self.device_id) if self.device_id!=-1 else Variable(x_cpu)
                 y = Variable(y_cpu).cuda(self.device_id) if self.device_id!=-1 else Variable(y_cpu)
                # pdb.set_trace()
@@ -137,12 +139,17 @@ class Loop_withRace:
                         df.to_csv(self.model_log_file, index=False)
                 iteration = iteration + 1
                 loc_itr = loc_itr + 1
+               # print('********iteration******', iteration) # iteration over the filtered data
+               # print('*********data iter**********',self.train_data.sampler.iter_idx) # iteraion over the filtered data
+               # print('*********data iter interim**********',self.train_data.sampler.iter_interim_idx) # iteration over the whole data
+               # print()
                 #print("Loss", loss)
            # pdb.set_trace()
            # sketch = self.race.get_dictionary()
             epoch = epoch + 1
+            loc_itr = 0
 
-        self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+        self.progress_evaluator.evaluate(epoch-1, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
         if self.model_internal_logging_itr > 0:
             logdata = self.model.get_logged_data(True)
             if logdata is not None:

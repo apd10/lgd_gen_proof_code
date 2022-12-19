@@ -11,7 +11,7 @@ class Data:
         - dataparser for the file (dataset)
         - sampler
     '''
-    def __init__(self, data_params, model=None, race=None, device_id=None, loss=None):
+    def __init__(self, data_params, model=None, race=None , device_id=None, loss=None):
         super(Data, self).__init__()
         self.data_file = data_params["file"]
         self.n_dataset = data_params["dataset"]

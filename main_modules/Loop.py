@@ -16,7 +16,7 @@ class Loop:
         self.device_id = params["device_id"]
         self.epochs = params["epochs"]
         # data
-        self.train_data = Data(params["train_data"])
+        #self.train_data = Data(params["train_data"])
         self.progress_test_data = Data(params["progress_test_data"])
         datas = {"valid" : self.progress_test_data}
         self.test_data = None
@@ -29,6 +29,7 @@ class Loop:
             datas['train'] = self.progress_train_data
         # model
         self.model = Model.get(params["model"])
+        self.train_data = Data(params["train_data"],model=self.model)
         print(self.model)
         if self.device_id != -1:
           self.model = self.model.cuda(self.device_id)
@@ -112,7 +113,7 @@ class Loop:
                     loss = self.loss_func(output, y)
                 loss.backward()
                 self.optimizer.step()
-                self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+                self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
                 if self.model_internal_logging_itr > 0 and iteration % self.model_internal_logging_itr == 0:
                     self.model.logger(iteration, True)
                     logdata = self.model.get_logged_data(True)
@@ -122,9 +123,12 @@ class Loop:
                 iteration = iteration + 1
                 loc_itr = loc_itr + 1
                 #print("Loss", loss)
+            loc_itr = 0
+           # self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
             epoch = epoch + 1
+            #loc_itr = 0
 
-        self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+        self.progress_evaluator.evaluate(epoch-1, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
         if self.model_internal_logging_itr > 0:
             logdata = self.model.get_logged_data(True)
             if logdata is not None:

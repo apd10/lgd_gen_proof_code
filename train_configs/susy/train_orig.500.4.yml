@@ -67,6 +67,6 @@ progress_evaluator:
       eval_itr: 1000
       eval_epoch: 1
       csv_dump: "DATA/susy/record/log.train.sg8.L500.N4.csv"
-      skip_0: 1
+      skip_0: 0
 metrics: "acc,auc"
 binary: True

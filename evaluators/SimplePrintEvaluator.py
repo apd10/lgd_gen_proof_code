@@ -19,16 +19,16 @@ class SimplePrintEvaluator:
           self.csv_dump = params["csv_dump"]
       self.header_written = False
 
-    def evaluate(self, epoch, loc_itr, iteration, model, loss_func, metrics=None, binary=False, regression=False, split_label=False): # also logs
+    def evaluate(self, epoch, loc_itr, iteration, model, loss_func, sampling_rate, metrics=None, binary=False, regression=False, split_label=False): # also logs
         if self.skip_0 :
             if epoch == 0 and loc_itr == 0:
                 return
         if iteration % self.eval_itr == 0 or (epoch % self.eval_epoch == 0 and loc_itr == 0):
             #self._eval(epoch, loc_itr, iteration, model, loss_func, self.train_data, "TRAIN")
             for key in self.datas.keys():
-                self._eval(epoch, loc_itr, iteration, model, loss_func, self.datas[key], key, metrics, binary, regression, split_label)
+                self._eval(epoch, loc_itr, iteration, model, loss_func, sampling_rate, self.datas[key], key, metrics, binary, regression, split_label)
 
-    def _eval(self, epoch, loc_itr, iteration, model, loss_func, data, key, metrics, binary, regression, split_label):
+    def _eval(self, epoch, loc_itr, iteration, model, loss_func, sampling_rate, data, key, metrics, binary, regression, split_label):
         count = 0
         total_loss = 0.
         model.eval()
@@ -37,9 +37,9 @@ class SimplePrintEvaluator:
         y_pred = np.array([])
         y_score = np.array([])
         split_key = key
+        print('=====evaluating on',split_key,'=========')
         
         with torch.no_grad():
-            #pdb.set_trace()
             data.reset()
             while not data.end():
                 x, y = data.next()
@@ -115,7 +115,7 @@ class SimplePrintEvaluator:
             f = open(self.csv_dump, "a")
             if  not self.header_written:
                 self.header_written = True
-                f.write('{},{},{},{},{},{}{}\n'.format("key", "epoch", "loc_itr", "iteration", "loss", "acc",aux_header))
-            f.write('{},{},{},{},{},{}{}\n'.format(split_key, epoch, loc_itr, iteration, valid_loss, acc,aux_data))
+                f.write('{},{},{},{},{},{}{},{}\n'.format("key", "epoch", "loc_itr", "iteration", "loss", "acc",aux_header,"sampling_rate"))
+            f.write('{},{},{},{},{},{}{},{}\n'.format(split_key, epoch, loc_itr, iteration, valid_loss, acc, aux_data, sampling_rate))
             f.close()
             

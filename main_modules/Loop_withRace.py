@@ -110,9 +110,10 @@ class Loop_withRace:
                   break
                 self.model.train()
                 self.optimizer.zero_grad()
-                x_cpu, y_cpu = self.train_data.next_filter()
+                x_cpu, y_cpu, w_cpu = self.train_data.next_filter()
                 x = Variable(x_cpu).cuda(self.device_id) if self.device_id!=-1 else Variable(x_cpu)
                 y = Variable(y_cpu).cuda(self.device_id) if self.device_id!=-1 else Variable(y_cpu)
+                wght = Variable(w_cpu).cuda(self.device_id) if self.device_id!=-1 else Variable(w_cpu)
                # pdb.set_trace()
                 output = self.model(x)
               #  self.race.sketch(x_cpu, y_cpu)
@@ -124,11 +125,12 @@ class Loop_withRace:
                     loss = self.loss_func(output, y, reduction='none')
 
                # self.race.sketch(x_cpu, y_cpu, loss.to(device=x_cpu.device))    
-                #pdb.set_trace()
+              #  pdb.set_trace()
                 #self.race.query_values(x_cpu)
+                loss = torch.mul(loss, wght) # weighted_loss
                 loss.mean().backward()
                 self.optimizer.step()
-                self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+                self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points/self.train_data.unfiltered_num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
                 #pdb.set_trace()
                 if self.model_internal_logging_itr > 0 and iteration % self.model_internal_logging_itr == 0:
                    # pdb.set_trace()
@@ -139,17 +141,23 @@ class Loop_withRace:
                         df.to_csv(self.model_log_file, index=False)
                 iteration = iteration + 1
                 loc_itr = loc_itr + 1
+                
                # print('********iteration******', iteration) # iteration over the filtered data
                # print('*********data iter**********',self.train_data.sampler.iter_idx) # iteraion over the filtered data
                # print('*********data iter interim**********',self.train_data.sampler.iter_interim_idx) # iteration over the whole data
                # print()
                 #print("Loss", loss)
-           # pdb.set_trace()
+        #    pdb.set_trace()
            # sketch = self.race.get_dictionary()
-            epoch = epoch + 1
             loc_itr = 0
+       #     self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
+            epoch = epoch + 1 
+            #loc_itr = 0
+            print('****num whole data****',self.train_data.unfiltered_num_points)
+            print('****num filtered data****',self.train_data.num_points)
+            assert self.train_data.unfiltered_num_points==num_samples
 
-        self.progress_evaluator.evaluate(epoch-1, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+        self.progress_evaluator.evaluate(epoch-1, loc_itr, iteration, self.model, self.loss_func, self.train_data.num_points/self.train_data.unfiltered_num_points, metrics=self.metrics, binary=self.binary, regression=self.regression)
         if self.model_internal_logging_itr > 0:
             logdata = self.model.get_logged_data(True)
             if logdata is not None:

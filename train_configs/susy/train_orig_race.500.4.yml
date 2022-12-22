@@ -1,6 +1,6 @@
 module: "LoopRace"
 device_id: 7
-epochs: 2
+epochs: 5
 train_data:
   file: "DATA/susy/train.txt"
   dataset: "csv"
@@ -13,6 +13,8 @@ train_data:
   race:
     batch_size: 1024
     sampling_rate: 0.8
+    accept_prob: 0.1
+    warmup_niter: 5
     race_update_freq: 1000000000 # per x iterations 
 test_data:
   file: "DATA/susy/test.txt"
@@ -79,10 +81,10 @@ loss:
 progress_evaluator:
   name: "simple_print"
   simple_print:
-          # eval_itr: 500000000
+          #eval_itr: 500000000
       eval_itr: 1000
       eval_epoch: 1
-      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race_test.csv"
-      skip_0: 1
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race_sr0.8_Noupdate.csv"
+      skip_0: 0
 metrics: "acc,auc"
 binary: True

@@ -31,7 +31,7 @@ class Data:
     def next_filter(self): # Race sampler
         num, unfilt_idx, X = self.sampler.next()
         self.num_points += num # number of filtered data points
-        self.unfiltered_num_points = unfilt_idx+1 # +1 because index starts from zero
+        self.unfiltered_num_points = unfilt_idx 
         return X
         
     def end(self): # Simple sampler

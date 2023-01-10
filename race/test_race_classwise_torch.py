@@ -140,5 +140,4 @@ def test_scores_account_for_alpha():
     assert A_average_score > 5 * B_average_score
 
 
-# - Scores are as expected? But what is the expectation?
 # - Repeat the above tests for classwise inserts

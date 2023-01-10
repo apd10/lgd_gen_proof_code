@@ -54,15 +54,20 @@ class Race_Classwise_torch():
                     self.sketch_unweighted[c][i].scatter_add_(0,examples_perclass.type(torch.LongTensor),torch.ones_like(val_weight))
  
 
-    # batchwise
-    # class independent
-    def query(self, x):
-        mean = []
+    def query_all_rows(self, x):
+        rowwise_scores = []
         hash_vals = self.hashfunc.hash(x) # compute hash values
         hashcode = torch.fmod(hash_vals, self.W) # rehash and map to the range of number of buckets 
         for i in range(hashcode.shape[1]):# hashcode.shape[1] = self.R (num hashes)
-            mean.append(torch.gather(self.counts[i],0,hashcode[:,i].type(torch.LongTensor)))
-        return sum(mean)/(self.R)
+            rowwise_scores.append(torch.gather(self.counts[i],0,hashcode[:,i].type(torch.LongTensor)))
+        return rowwise_scores
+
+
+    # batchwise
+    # class independent
+    def query(self, x):
+        rowwise_scores = self.query_all_rows(x)
+        return sum(rowwise_scores)/(self.R)
     
 
     # Batchwise, Class-based

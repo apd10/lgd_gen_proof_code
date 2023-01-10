@@ -3,6 +3,7 @@ from race.race_classwise_torch import Race_Classwise_torch
 import numpy as np 
 import torch
 from functools import reduce
+import random
 
 # RACE Unit tests
 # Properties to be assessed:
@@ -83,6 +84,7 @@ def test_more_populous_neighborhood_gets_higher_score():
     B_population = 100
     
     # Means are 180˚ apart; their hashes will never collide.
+    # Their neighbors may collide though.
     A_mean = np.random.normal(0.0, scale=1.0, size=(INPUT_DIMENSION,))
     B_mean = -A_mean
     
@@ -102,8 +104,41 @@ def test_more_populous_neighborhood_gets_higher_score():
     assert A_average_score > 5 * B_average_score
 
 
+def test_scores_account_for_alpha():
+    """Checks RACE counts are correctly weighted by alpha for each sample. 
+    To test this, we pass pass in a dataset consisting of two neighborhoods,
+    one with 10 times the alpha of the other. We then check that the scores 
+    reflect this difference in alpha.
+    """
+    race = Race_Classwise_torch(RACE_PARAMS)
+    neighborhood_population = 100
+    
+    # Means are 180˚ apart; their hashes will never collide. 
+    # Their neighbors may collide though.
+    A_mean = np.random.normal(0.0, scale=1.0, size=(INPUT_DIMENSION,))
+    B_mean = -A_mean
+    
+    # Use smaller scale to generate neighborhood so that neighbors are much
+    # closer to their respective centers than elements of the other neighborhood.
+    neighborhood_A = random_dataset(neighborhood_population, A_mean, scale=0.5)
+    neighborhood_B = random_dataset(neighborhood_population, B_mean, scale=0.5)
+    combined_neighborhoods = torch.concat([neighborhood_A, neighborhood_B])
+
+    # Neighborhood A elements have 10 times the alpha.
+    A_alphas = torch.ones(size=(neighborhood_population,)) * 10
+    B_alphas = torch.ones(size=(neighborhood_population,))
+    combined_alphas = torch.concat([A_alphas, B_alphas])
+
+    race = Race_Classwise_torch(RACE_PARAMS)
+    race.add(combined_neighborhoods, combined_alphas)
+
+    A_average_score = torch.mean(race.query(neighborhood_A))
+    B_average_score = torch.mean(race.query(neighborhood_B))
+    
+    # Factor of 5 instead of 10 because there may be hash collisions between
+    # elements of the different neighborhoods.
+    assert A_average_score > 5 * B_average_score
 
 
-# - Test weights are incorporated in score
 # - Scores are as expected? But what is the expectation?
 # - Repeat the above tests for classwise inserts

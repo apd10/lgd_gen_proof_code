@@ -5,14 +5,6 @@ import torch
 from functools import reduce
 import random
 
-# RACE Unit tests
-# Properties to be assessed:
-# - Independence of each row
-# - Score is higher when there are more similar elements
-# - Test weights are incorporated in score
-# - Scores are as expected? But what is the expectation?
-# - Repeat the above tests for classwise inserts
-
 INPUT_DIMENSION = 8
 
 RACE_PARAMS = {

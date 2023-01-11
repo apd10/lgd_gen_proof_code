@@ -1,5 +1,5 @@
-module: "Loop"
-device_id: 6
+module: "LoopRace"
+device_id: 7
 epochs: 5
 train_data:
   file: "DATA/susy/train.txt"
@@ -9,9 +9,13 @@ train_data:
     label_header: 0
     centering_info: "DATA/susy/centering_info.npz"
     use_only: 8
-  sampler: "simple"
-  simple:
+  sampler: "race"
+  race:
     batch_size: 1024
+    sampling_rate: 0.8
+    accept_prob: 0.1
+    warmup_niter: 5
+    race_update_freq: 1000000000 # per x iterations 
 test_data:
   file: "DATA/susy/test.txt"
   dataset: "csv"
@@ -31,7 +35,6 @@ progress_test_data:
     label_header: 0
     centering_info: "DATA/susy/centering_info.npz"
     use_only: 8
-
   sampler: "simple"
   simple:
     batch_size: 1024
@@ -46,6 +49,21 @@ progress_train_data:
   sampler: "simple"
   simple:
     batch_size: 1024
+np_seed: 101
+race:
+  num_classes: 2
+  num_bucket: 10000  
+  device_id : -1 # to do on cpu. test device as well later
+  recovery : "mean" # mean recovery
+  lsh_function:
+    name: "srp_torch"
+    srp_torch:
+      dimension: 8
+      num_bits: 16
+      num_hash : 100
+      seed: 101
+      device_id: -1
+
 model:
   name: "MLPSG"
   MLPSG:
@@ -66,7 +84,7 @@ progress_evaluator:
           #eval_itr: 500000000
       eval_itr: 1000
       eval_epoch: 1
-      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4.csv"
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4_race_sr0.8_Noupdate.csv"
       skip_0: 0
 metrics: "acc,auc"
 binary: True

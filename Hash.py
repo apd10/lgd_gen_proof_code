@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from hashes.list_hashfunctions import *
 
 class HashFunction:
-  def get(params, num_hashes):
+  def get(params, num_hashes, num_bits=None):
     hash_func = None
     if params["name"] == "l2lsh":
       hash_func = L2LSH(params["l2lsh"], num_hashes)
@@ -14,7 +14,7 @@ class HashFunction:
     elif params["name"] == "srp":
       hash_func = SRP(params["srp"], num_hashes)
     elif params["name"] == "srp_torch":
-      hash_func = SRP_TORCH(params["srp_torch"], num_hashes)
+      hash_func = SRP_TORCH(params["srp_torch"], num_hashes, num_bits)
     elif params["name"] == "hist":
       hash_func = HISTOGRAM(params["hist"])
     else:

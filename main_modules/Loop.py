@@ -10,6 +10,26 @@ import pdb
 import numpy as np
 from tqdm import tqdm
 import pandas as pd
+from functorch import make_functional_with_buffers, vmap, grad
+from samplers.LGDExactSampler import LGDExactSampler
+
+fmodel, binary, regression, loss_func = None, None, None, None
+
+def compute_loss_stateless_model (params, buffers, sample, target):
+    global fmodel, binary, regression, loss_func
+    batch = sample.unsqueeze(0)
+    targets = target.unsqueeze(0)
+
+    predictions = fmodel(params, buffers, batch)
+    if binary or regression:
+        loss = loss_func(predictions.view(-1), targets.float())
+    else:
+        loss = loss_func(predictions, targets)
+
+    return loss
+ft_compute_grad = grad(compute_loss_stateless_model)
+ft_compute_sample_grad = vmap(ft_compute_grad, in_dims=(None, None, 0, 0))
+
 
 class Loop:
     def __init__(self, params):
@@ -29,6 +49,7 @@ class Loop:
             datas['train'] = self.progress_train_data
         # model
         self.model = Model.get(params["model"])
+
         print(self.model)
         if self.device_id != -1:
           self.model = self.model.cuda(self.device_id)
@@ -83,6 +104,8 @@ class Loop:
     
 
     def loop(self):
+        global fmodel, binary, regression, loss_func
+        grad_norms = []
         epoch = 0
         iteration = 0
         if self.set_full_data_in_model:
@@ -110,9 +133,22 @@ class Loop:
                     loss = self.loss_func(output.view(-1), y.float())
                 else:
                     loss = self.loss_func(output, y)
+
+                fmodel, params, buffers = make_functional_with_buffers(self.model)
+                binary, regression, loss_func = self.binary, self.regression, self.loss_func
+                ft_per_sample_grads = ft_compute_sample_grad(params, buffers, x, y)
+
+                if type(self.train_data.sampler) == LGDExactSampler:
+                    self.train_data.sampler.payload = (x, y, ft_per_sample_grads)
+
+
                 loss.backward()
+                grad_norms.append(np.sqrt(np.sum([np.float(torch.sum(p.grad**2).cpu()) for p in self.model.parameters()])))
                 self.optimizer.step()
                 self.progress_evaluator.evaluate(epoch, loc_itr, iteration, self.model, self.loss_func, metrics=self.metrics, binary=self.binary, regression=self.regression)
+  
+                if ((epoch*num_batches + i + 1) % 100 == 0):
+                    np.savez_compressed("grads.npz", grads = np.array(grad_norms))
                 if self.model_internal_logging_itr > 0 and iteration % self.model_internal_logging_itr == 0:
                     self.model.logger(iteration, True)
                     logdata = self.model.get_logged_data(True)

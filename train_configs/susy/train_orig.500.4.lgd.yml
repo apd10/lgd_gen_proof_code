@@ -9,9 +9,12 @@ train_data:
     label_header: 0
     centering_info: "DATA/susy/centering_info.npz"
     use_only: 8
-  sampler: "simple"
-  simple:
+  sampler: "simple_lgd"
+  simple_lgd:
     batch_size: 1024
+    nn_percent: 0.5
+    nn_reset: -1
+
 test_data:
   file: "DATA/susy/test.txt"
   dataset: "csv"
@@ -54,7 +57,7 @@ progress_evaluator:
   simple_print:
       eval_itr: 100
       eval_epoch: 1
-      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4.csv"
+      csv_dump: "DATA/susy/record/log.train.sg8.L500.N4.lgd.csv"
       skip_0: 1
 metrics: "acc,auc"
 binary: True

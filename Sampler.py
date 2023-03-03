@@ -9,6 +9,8 @@ class Sampler:
             sampler = SimpleSampler1hnn(dataset, params)
         elif name == "subsimple":
             sampler = SubSimpleSampler(dataset, params)
+        elif name == "simple_lgd":
+            sampler = LGDExactSampler(dataset, params)
         else:
             raise NotImplementedError
         return sampler

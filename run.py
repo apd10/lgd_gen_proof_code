@@ -25,7 +25,7 @@ parser.add_argument('--config', action="store", dest="config", type=str, default
 results = parser.parse_args()
 config_file = results.config
 with open(config_file, "r") as f:
-  config = yaml.load(f)
+  config = yaml.load(f, Loader=yaml.FullLoader)
 if config['module'] == "Loop":
   run = Loop(config)
   run.loop()
